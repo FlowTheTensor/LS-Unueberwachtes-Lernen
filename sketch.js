@@ -82,9 +82,9 @@ const PLOT = { x: 104, y: 134, w: 700, h: 612 };
 const KARTE_B = 175; // Auflösung der Gebietskarte
 const KARTE_H = 153;
 
-// Farben nach dem Corporate Design der Jakob-Preh-Schule (bsnes.de):
+// Farben (hell und dunkel) nach dem Corporate Design der Jakob-Preh-Schule (bsnes.de):
 // Papierweiß, Logo-Schwarz, Schul-Rot als Akzent, Senf als zweiter Akzent.
-const FARBE = {
+const FARBE_HELL = {
   papier: [251, 249, 245],
   flaeche: [255, 255, 255],
   flaeche2: [243, 238, 230],
@@ -96,7 +96,73 @@ const FARBE = {
   akzentHell: [228, 0, 43],
   senf: [184, 122, 28],
   neutral: [160, 155, 146], // Messpunkt ohne Cluster
+  // Flächen und Schrift auf Flächen (für das dunkle Schema nötig)
+  textInvers: [255, 255, 255],
+  dunkelFlaeche: [29, 29, 28],
+  schatten: [29, 29, 28],
+  akzentFlaeche: [253, 240, 242],
+  akzentLinie: [240, 200, 208],
+  rotFlaeche: [251, 225, 230],
+  gruenFlaeche: [228, 241, 233],
 };
+
+const FARBE_DUNKEL = {
+  papier: [22, 22, 21],
+  flaeche: [32, 31, 30],
+  flaeche2: [44, 42, 40],
+  linie: [62, 59, 55],
+  text: [236, 232, 224],
+  grau: [184, 178, 168],
+  blass: [140, 135, 126],
+  akzent: [236, 76, 98],
+  akzentHell: [255, 64, 92],
+  senf: [222, 166, 72],
+  neutral: [120, 116, 108],
+  textInvers: [22, 22, 21],
+  dunkelFlaeche: [70, 67, 62],
+  schatten: [0, 0, 0],
+  akzentFlaeche: [52, 27, 32],
+  akzentLinie: [104, 44, 56],
+  rotFlaeche: [72, 32, 40],
+  gruenFlaeche: [30, 54, 41],
+};
+
+const FARBE = {};
+
+// --- Farbschema hell/dunkel ---------------------------------------------------
+// FARBE enthält immer die aktive Palette. Beim Umschalten werden die Arrays
+// in place überschrieben, damit Verweise wie [FARBE.blau, …] gültig bleiben.
+// Die Wahl gilt für alle Lernsituationen (gleicher localStorage-Schlüssel).
+const FARBSCHEMA_SCHLUESSEL = "jps-lernsituationen-farbschema";
+let dunkelModus = false;
+
+function setzeFarbschema(dunkel) {
+  dunkelModus = !!dunkel;
+  const quelle = dunkelModus ? FARBE_DUNKEL : FARBE_HELL;
+  for (const k in quelle) {
+    if (FARBE[k]) {
+      FARBE[k].splice(0, FARBE[k].length, ...quelle[k]);
+    } else {
+      FARBE[k] = quelle[k].slice();
+    }
+  }
+  document.documentElement.classList.toggle("dunkelmodus", dunkelModus);
+}
+
+function gespeichertesFarbschema() {
+  try {
+    const v = localStorage.getItem(FARBSCHEMA_SCHLUESSEL);
+    if (v === "dunkel" || v === "hell") {
+      return v === "dunkel";
+    }
+  } catch (e) {
+    // kein Speicher verfügbar (z. B. privater Modus) – Systemeinstellung nehmen
+  }
+  return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+
+setzeFarbschema(gespeichertesFarbschema());
+
 
 // Farben der Cluster C1 … C8
 const CLUSTER_FARBE = [
@@ -468,7 +534,7 @@ function mausY() {
 // Karte im Stil der Schule: weiße Fläche, feine Linie, Titel mit rotem Punkt
 function panel(p) {
   noStroke();
-  fill(29, 29, 28, 10);
+  fill(...FARBE.schatten, 10);
   rect(p.x + 1, p.y + 3, p.w, p.h, 12);
   fill(...FARBE.flaeche);
   stroke(...FARBE.linie);
@@ -491,7 +557,7 @@ function panel(p) {
 }
 
 function hell(farbe, anteil) {
-  return [lerp(farbe[0], 255, anteil), lerp(farbe[1], 255, anteil), lerp(farbe[2], 255, anteil)];
+  return [lerp(farbe[0], FARBE.flaeche[0], anteil), lerp(farbe[1], FARBE.flaeche[1], anteil), lerp(farbe[2], FARBE.flaeche[2], anteil)];
 }
 
 function clusterFarbe(c) {
@@ -578,9 +644,9 @@ function zeichneKopf() {
 // Beispiel (HTML-Knöpfe, siehe ui.js). Gleiches Schema in allen PW-Programmen.
 function zeichneBeispielLeiste() {
   noStroke();
-  fill(253, 240, 242);
+  fill(...FARBE.akzentFlaeche);
   rect(0, 56, W, LEISTE);
-  stroke(240, 200, 208);
+  stroke(...FARBE.akzentLinie);
   strokeWeight(1);
   line(0, 56 + LEISTE, W, 56 + LEISTE);
   noStroke();
@@ -711,7 +777,7 @@ function berechneKarte() {
 
 function zeichneForm(x, y, form, r, farbe, alpha) {
   if (form === "kreuz") {
-    stroke(255, alpha);
+    stroke(...FARBE.flaeche, alpha);
     strokeWeight(5);
     line(x - r, y - r, x + r, y + r);
     line(x - r, y + r, x + r, y - r);
@@ -721,7 +787,7 @@ function zeichneForm(x, y, form, r, farbe, alpha) {
     line(x - r, y + r, x + r, y - r);
     return;
   }
-  stroke(255, alpha);
+  stroke(...FARBE.flaeche, alpha);
   strokeWeight(1.3);
   fill(farbe[0], farbe[1], farbe[2], alpha);
   if (form === "quadrat") {
@@ -737,9 +803,9 @@ function zeichneForm(x, y, form, r, farbe, alpha) {
 
 function zeichneZentrum(x, y, farbe, nr, hervor) {
   noStroke();
-  fill(29, 29, 28, 40);
+  fill(...FARBE.schatten, 40);
   circle(x + 1, y + 2, 32);
-  fill(255);
+  fill(...FARBE.flaeche);
   stroke(...farbe);
   strokeWeight(hervor ? 4.5 : 3.5);
   circle(x, y, hervor ? 32 : 28);
@@ -753,7 +819,7 @@ function zeichneZentrum(x, y, farbe, nr, hervor) {
   textSize(15);
   const b = textWidth(s) + 10;
   noStroke();
-  fill(255, 230);
+  fill(...FARBE.flaeche, 230);
   rect(x + 14, y - 26, b, 20, 6);
   fill(...farbe);
   textAlign(LEFT, CENTER);
@@ -798,7 +864,7 @@ function zeichneDatenPanel() {
   for (let i = 0; i <= anzX; i++) {
     const v = m1.min + i * m1.gitter;
     const [gx] = zuPlot(v, m2.min);
-    stroke(0, 0, 0, 25);
+    stroke(...FARBE.text, 25);
     strokeWeight(1);
     line(gx, PLOT.y, gx, PLOT.y + PLOT.h);
     noStroke();
@@ -810,7 +876,7 @@ function zeichneDatenPanel() {
   for (let i = 0; i <= anzY; i++) {
     const v = m2.min + i * m2.gitter;
     const [, gy] = zuPlot(m1.min, v);
-    stroke(0, 0, 0, 25);
+    stroke(...FARBE.text, 25);
     line(PLOT.x, gy, PLOT.x + PLOT.w, gy);
     noStroke();
     fill(...FARBE.grau);
@@ -921,7 +987,7 @@ function zeichneDatenPanel() {
     drawingContext.setLineDash([6, 5]);
     line(nx, ny, zx, zy);
     drawingContext.setLineDash([]);
-    stroke(255);
+    stroke(...FARBE.flaeche);
     strokeWeight(2);
     fill(...(neuePunkt.auffaellig ? FARBE.akzentHell : FARBE.text));
     zeichneStern(nx, ny, 14);
@@ -1022,7 +1088,7 @@ function zeichneAbstaende(b, zs, label) {
     textSize(12);
     textStyle(i === best ? BOLD : NORMAL);
     const w = textWidth(s) + 10;
-    fill(255, 235);
+    fill(...FARBE.flaeche, 235);
     stroke(...(i === best ? FARBE.text : FARBE.linie));
     strokeWeight(1);
     rect(mx - w / 2, my - 9, w, 18, 5);
@@ -1064,7 +1130,7 @@ function zeichnePlotBanner() {
   textSize(14);
   const b = textWidth(s) + 28;
   noStroke();
-  fill(29, 29, 28, 225);
+  fill(...FARBE.dunkelFlaeche, 225);
   rect(PLOT.x + PLOT.w / 2 - b / 2, PLOT.y + 14, b, 32, 16);
   fill(255);
   textAlign(CENTER, CENTER);
@@ -1508,7 +1574,7 @@ function zeichneTooltip() {
   const w = textWidth(s) + 18;
   const tx = Math.min(mx + 14, W - w - 10);
   noStroke();
-  fill(29, 29, 28, 235);
+  fill(...FARBE.dunkelFlaeche, 235);
   rect(tx, my + 14, w, 26, 6);
   fill(255);
   textAlign(LEFT, CENTER);

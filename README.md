@@ -133,6 +133,7 @@ Nach dem Konvergieren lässt sich per Klick eine neue Messung einordnen. Sie kom
 | Maus über einem Punkt | Nummer, Messwerte und Abstände zu allen Zentren |
 | Zentrum mit der Maus ziehen | Zentrum von Hand verschieben, danach neu zuordnen |
 | Klick ins Diagramm (wenn fertig) | neue Messung einordnen |
+| Mond / Sonne oben rechts | dunkles oder helles Farbschema; die Wahl wird im Browser gespeichert und gilt für alle Lernsituationen |
 
 **Einstellungen:** Anzahl der Cluster k (1 … 8), Startzentren, Tempo, Normierung, Wege der Zentren, Abstandslinien. „Neue Messdaten“ erzeugt einen neuen Datensatz mit denselben Gruppen, „CSV speichern“ lädt die Daten mit der gefundenen Cluster-Nummer herunter (z. B. für Excel oder Python).
 
@@ -164,6 +165,7 @@ Nach dem Konvergieren lässt sich per Klick eine neue Messung einordnen. Sie kom
 | `ui.js` | Knöpfe, Auswahllisten, Kästchen |
 | `sketch.js` | Ablauf, Zeichnen, Erklärtexte |
 | `assets/logo-jps.png` | Logo der Jakob-Preh-Schule |
+| `assets/logo-jps-hell.png` | Logo in Weiß für das dunkle Farbschema |
 | `libraries/p5.min.js` | p5.js (lokal, damit die Seite auch offline läuft) |
 
 Ein weiteres Beispiel lässt sich ergänzen, indem man in `daten.js` einen Eintrag in `SZENARIEN` hinzufügt (zwei Merkmale, Gruppen mit Mittelwert und Streuung, Wörter für die Texte). Es erscheint dann automatisch als weiterer Reiter in der Beispiel-Leiste.
@@ -179,6 +181,7 @@ Am einfachsten in VS Code mit der Erweiterung **Live Server**: Rechtsklick auf `
 - Alle Schleifen haben geschweifte Klammern: Der p5-Web-Editor baut in Schleifen eine Endlosschleifen-Sicherung ein, die bei Schleifen ohne Klammern fehlschlägt.
 - Fehler in `draw()` werden abgefangen und als Hinweis angezeigt, statt das Programm einzufrieren.
 - Jeder Datensatz wird mit festem Startwert erzeugt und ist deshalb bei jedem Start gleich. Erst „Neue Messdaten“ würfelt neu.
+- **Farbschema hell/dunkel:** Alle Farben stehen in zwei Paletten (`FARBE_HELL`, `FARBE_DUNKEL`); `FARBE` enthält die aktive Palette und wird beim Umschalten in place überschrieben. Die CSS-Variablen in `style.css` wechseln über die Klasse `dunkelmodus` am `<html>`-Element. Die Wahl steht im `localStorage` unter `jps-lernsituationen-farbschema` (ohne Speicher gilt die Systemeinstellung). Im dunklen Schema zeigt die Kopfzeile `assets/logo-jps-hell.png`.
 
 ## Lizenz
 
@@ -200,5 +203,5 @@ Vorschlag für die Namensnennung: *„KI-Prozessanalyse · k-Means“ von Christ
 |---|---|
 | `libraries/p5.min.js` | [p5.js](https://p5js.org), GNU LGPL 2.1 |
 | `libraries/p5.sound.min.js` | [p5.sound](https://p5js.org/reference/p5.sound/), GNU LGPL 2.1 |
-| `assets/logo-jps.png` | Logo der Jakob-Preh-Schule – alle Rechte bei der Schule |
+| `assets/logo-jps.png`, `assets/logo-jps-hell.png` | Logo der Jakob-Preh-Schule – alle Rechte bei der Schule |
 | Schriften Quicksand, Inter, JetBrains Mono | über Google Fonts eingebunden, SIL Open Font License 1.1 |
